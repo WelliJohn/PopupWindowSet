@@ -1,0 +1,21 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 底部popup-->
+    <style name="PopupWindow_Bottom_Animation">
+        <item name="android:windowEnterAnimation">@anim/popup_bottom_show</item>
+        <item name="android:windowExitAnimation">@anim/popup_bottom_hide</item>
+    </style>
+
+    <style name="PopupAnimation">
+        <item name="android:windowEnterAnimation">@anim/popshow</item>
+        <item name="android:windowExitAnimation">@anim/pophidden</item>
+    </style>
+
+
+    <style name="user_click_item_cutline">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0.5dp</item>
+        <item name="android:background">#eeeeee</item>
+    </style>
+
+</resources>
