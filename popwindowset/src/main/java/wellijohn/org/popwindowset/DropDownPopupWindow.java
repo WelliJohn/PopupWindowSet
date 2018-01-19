@@ -29,20 +29,33 @@ public class DropDownPopupWindow extends PopupWindow implements View.OnClickList
 
     private View contentParentView;
 
-
+    /**
+     * contentViewHeight 不需要指定的时候可以赋值为<0
+     */
     public DropDownPopupWindow(View contentView) {
-        super(contentView);
-        initPopView(contentView);
+        this(contentView, -1);
     }
 
-    public DropDownPopupWindow(View contentView, int width, int height) {
-        super(contentView, width, height);
-        initPopView(contentView);
+    /**
+     * contentViewHeight 不需要指定的时候可以赋值为<0
+     */
+    public DropDownPopupWindow(View contentView, int contentViewHeight) {
+        this(contentView, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, contentViewHeight);
     }
 
-    public DropDownPopupWindow(View contentView, int width, int height, boolean focusable) {
+    /**
+     * contentViewHeight 不需要指定的时候可以赋值为<0
+     */
+    public DropDownPopupWindow(View contentView, int width, int height, int contentViewHeight) {
+        this(contentView, width, height, true, contentViewHeight);
+    }
+
+    /**
+     * contentViewHeight 不需要指定的时候可以赋值为<0
+     */
+    public DropDownPopupWindow(View contentView, int width, int height, boolean focusable, int contentViewHeight) {
         super(contentView, width, height, focusable);
-        initPopView(contentView);
+        initPopView(contentView, contentViewHeight);
     }
 
     public DropDownPopupWindow setLayerColor(@ColorRes int layerColor) {
@@ -58,18 +71,23 @@ public class DropDownPopupWindow extends PopupWindow implements View.OnClickList
         this.contentParentView = contentParentView;
     }
 
-    private void initPopView(View contentView) {
+    private void initPopView(View contentView, int contentViewHeight) {
         View popContentView = View.inflate(contentView.getContext(), R.layout.drop_down_popup_window, null);
         LinearLayout rootView = (LinearLayout) popContentView.findViewById(R.id.ll_popupwindow_rootview);
         LinearLayout contentParentView = (LinearLayout) popContentView.findViewById(R.id.ll_content_view);
         View layerView = popContentView.findViewById(R.id.view);
         contentParentView.addView(contentView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        //限制内容高度
+        if (contentViewHeight > 0) {
+            contentView.getLayoutParams().height = contentViewHeight;
+        }
+
         layerView.setBackgroundColor(layerColor);
         setContentParentView(contentParentView);
         setLayerView(layerView);
         setContentView(popContentView);
         rootView.setOnClickListener(this);
-        setAnimationStyle(R.style.PopupAnimation);
+//        setAnimationStyle(R.style.PopupAnimation);
         setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         setOutsideTouchable(true);
     }
@@ -109,12 +127,9 @@ public class DropDownPopupWindow extends PopupWindow implements View.OnClickList
             ((ViewGroup) contentView.getParent()).removeAllViews();
         }
 
-        contentParentView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        contentParentView.post(new Runnable() {
             @Override
-            public void onGlobalLayout() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    contentParentView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                }
+            public void run() {
                 if (null != layerView) {
                     int location[] = new int[2];
                     int y;
@@ -122,6 +137,7 @@ public class DropDownPopupWindow extends PopupWindow implements View.OnClickList
                     y = location[1];
                     LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) layerView.getLayoutParams();
                     lp.height = UIUtils.getScreenHeight(context) - (y + attachOnView.getHeight() + contentParentView.getHeight() + yoff);
+                    layerView.setLayoutParams(lp);
                 }
             }
         });
